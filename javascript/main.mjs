@@ -1,1 +1,1 @@
-export * from "./screeps-arena-starter-rust";
+export * from "./screeps-arena";
