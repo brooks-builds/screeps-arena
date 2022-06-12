@@ -1,4 +1,3 @@
-use log::warn;
 use screeps_arena::{Creep, ReturnCode};
 
 use crate::{
@@ -8,9 +7,6 @@ use crate::{
 
 use super::{group::Group, state::State};
 
-/// # Steps
-///
-/// - [ ] move the ranger to the flag
 pub fn run_defenders(state: &State) {
     for (index, creep) in state.creeps.iter().enumerate() {
         if !matches!(state.groups[index], Group::Defender) {
@@ -23,10 +19,10 @@ pub fn run_defenders(state: &State) {
             crate::creep_type::CreepType::Healer => handle_healer(creep, state),
         }
     }
+
+    handle_towers(state);
 }
 
-/// Move onto the flag and keep the enemy from getting until you die
-/// Also attack the closest enemy
 fn handle_ranger(creep: &Creep, state: &State) {
     creep.move_to(&state.my_flag, None);
     if let Some(closest_enemy_object) = creep.find_closest_by_range(&state.get_enemies_array()) {
@@ -42,7 +38,7 @@ fn handle_fighter(creep: &Creep, state: &State) {
         .find_closest_by_range(&state.get_enemies_array())
     {
         if let Some(closest_enemy) = state.get_enemy_by_object(closest_enemy_object) {
-            if creep.get_range_to(&creep_to_object(closest_enemy)) < 5 {
+            if creep.get_range_to(&creep_to_object(closest_enemy)) < 3 {
                 if creep.attack(closest_enemy) == ReturnCode::NotInRange {
                     creep.move_to(closest_enemy, None);
                 }
@@ -53,11 +49,6 @@ fn handle_fighter(creep: &Creep, state: &State) {
     }
 }
 
-/// healing priority
-///
-/// - healer(itself)
-/// - ranger
-/// - fighter
 fn handle_healer(healer: &Creep, state: &State) {
     let position = if state.my_flag.x() > 50 {
         create_vector_object(state.my_flag.x(), state.my_flag.y() + 1)
@@ -101,4 +92,12 @@ fn get_defending_fighter(state: &State) -> Option<&Creep> {
         }
     }
     None
+}
+
+fn handle_towers(state: &State) {
+    if let Some(enemy) = state.get_closest_enemy_to_flag_within_radius(2) {
+        state.towers.iter().for_each(|tower| {
+            tower.attack(enemy);
+        });
+    }
 }

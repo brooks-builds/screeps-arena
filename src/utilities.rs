@@ -36,12 +36,14 @@ pub fn creep_to_object(creep: &Creep) -> Object {
         &object,
         &JsValue::from_str("x"),
         &JsValue::from_str(&creep.x().to_string()),
-    );
+    )
+    .unwrap();
     Reflect::set(
         &object,
         &JsValue::from_str("y"),
         &JsValue::from_str(&creep.y().to_string()),
-    );
+    )
+    .unwrap();
     object
 }
 

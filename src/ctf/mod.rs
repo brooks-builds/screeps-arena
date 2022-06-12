@@ -1,7 +1,7 @@
-use log::warn;
+use self::{attackers::run_attackers, defenders::run_defenders, state::State};
 
-use self::{defenders::run_defenders, state::State};
-
+mod attack_state;
+mod attackers;
 mod defenders;
 mod group;
 mod state;
@@ -34,7 +34,9 @@ mod state;
 /// [Attacker, Defender, Attacker]
 /// [Warrior, Ranger, Healer]
 pub fn run() {
-    let state = State::new();
+    let mut state = State::new();
+    state.update_attack_state();
 
     run_defenders(&state);
+    run_attackers(&state);
 }

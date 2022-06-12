@@ -1,10 +1,16 @@
 use js_sys::{Array, JsString, Object, Reflect};
-use screeps_arena::{game::utils::get_objects_by_prototype, prototypes, Creep, Flag};
+use screeps_arena::{
+    game::{pathfinder::FindPathOptions, utils::get_objects_by_prototype},
+    prototypes, Creep, Flag, OwnedStructureProperties, StructureTower,
+};
 use wasm_bindgen::JsValue;
 
-use crate::{creep_type::CreepType, utilities::get_creep_type};
+use crate::{
+    creep_type::CreepType,
+    utilities::{creep_to_object, get_creep_type},
+};
 
-use super::group::Group;
+use super::{attack_state::AttackState, group::Group};
 
 pub struct State {
     pub creeps: Vec<Creep>,
@@ -12,11 +18,16 @@ pub struct State {
     pub types: Vec<CreepType>,
     pub my_flag: Flag,
     pub enemies: Vec<Creep>,
+    pub towers: Vec<StructureTower>,
+    pub attack_state: AttackState,
 }
 
 impl State {
     pub fn new() -> Self {
-        let state = Self::default().load_creeps().set_groups_and_types();
+        let state = Self::default()
+            .load_creeps()
+            .load_towers()
+            .set_groups_and_types();
 
         state
     }
@@ -30,6 +41,15 @@ impl State {
         self.enemies = get_objects_by_prototype(prototypes::CREEP)
             .into_iter()
             .filter(|creep| !creep.my())
+            .collect();
+
+        self
+    }
+
+    fn load_towers(mut self) -> Self {
+        self.towers = get_objects_by_prototype(prototypes::STRUCTURE_TOWER)
+            .into_iter()
+            .filter(|tower| tower.my().unwrap_or_default())
             .collect();
 
         self
@@ -102,6 +122,53 @@ impl State {
             .filter(|(index, _creep)| self.groups[*index] == group)
             .collect::<Vec<(usize, &Creep)>>()
     }
+
+    pub fn get_closest_enemy_to_flag_within_radius(&self, radius: u8) -> Option<&Creep> {
+        if let Some(enemy_object) = self
+            .my_flag
+            .find_closest_by_range(&self.get_enemies_array())
+        {
+            let enemy = self.get_enemy_by_object(enemy_object).unwrap();
+            if self.my_flag.get_range_to(&creep_to_object(enemy)) < radius {
+                Some(enemy)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_closest_enemy_to_creep_withing_radius(
+        &self,
+        creep: &Creep,
+        radius: u8,
+    ) -> Option<&Creep> {
+        if let Some(enemy_object) = creep.find_closest_by_range(&self.get_enemies_array()) {
+            let enemy = self.get_enemy_by_object(enemy_object).unwrap();
+            if creep.get_range_to(&creep_to_object(enemy)) < radius {
+                Some(enemy)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn update_attack_state(&mut self) {
+        if let Some(new_attack_state) = self.attack_state.update(&self) {
+            self.attack_state = new_attack_state;
+        }
+    }
+
+    pub fn get_closest_enemy(&self, creep: &Creep) -> Option<&Creep> {
+        if let Some(enemy_object) = creep.find_closest_by_path(&self.get_enemies_array(), None) {
+            return self.get_enemy_by_object(enemy_object);
+        }
+
+        None
+    }
 }
 
 impl Default for State {
@@ -117,6 +184,8 @@ impl Default for State {
             types: Default::default(),
             my_flag: my_flags[0].clone(),
             enemies: Default::default(),
+            towers: Default::default(),
+            attack_state: AttackState::Gathering,
         }
     }
 }
