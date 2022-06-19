@@ -1,8 +1,8 @@
-use log::warn;
 use screeps_arena::game;
 use wasm_bindgen::prelude::*;
 
 mod logging;
+mod tutorials;
 
 fn setup() {
     logging::setup_logging(logging::Info);
@@ -15,5 +15,24 @@ pub fn tick() {
     if tick == 1 {
         setup()
     }
-    warn!("current tick: {tick}");
+
+    #[cfg(feature = "arena-tutorial-loop-and-import")]
+    {
+        tutorials::loop_and_import::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-simple_move")]
+    {
+        tutorials::simple_move::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-first_attack")]
+    {
+        tutorials::first_attack::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-creeps_bodies")]
+    {
+        tutorials::creeps_bodies::run();
+    }
 }
