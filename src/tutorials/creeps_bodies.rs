@@ -1,6 +1,4 @@
-use screeps_arena::{
-    game::utils::get_objects_by_prototype, objects, prototypes, BodyPart, Creep, ReturnCode,
-};
+use screeps_arena::{game::utils::get_objects_by_prototype, prototypes, Creep, ReturnCode};
 
 #[allow(dead_code)]
 pub fn run() {

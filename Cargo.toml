@@ -23,6 +23,7 @@ web-sys = { version = "0.3", features = ["console"] }
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.6", optional = true }
+eyre = "0.6.8"
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
@@ -45,3 +46,9 @@ arena-tutorial-loop-and-import = []
 arena-tutorial-simple_move = []
 arena-tutorial-first_attack = []
 arena-tutorial-creeps_bodies = []
+arena-tutorial-store-and-transfer = []
+arena-tutorial-terrain = []
+arena-tutorial-spawn-creeps = []
+arena-tutorial-harvest-energy = []
+arena-tutorial-construction = []
+arena-tutorial-final-test = []

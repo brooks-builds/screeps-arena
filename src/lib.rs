@@ -1,7 +1,13 @@
+use log::warn;
 use screeps_arena::game;
 use wasm_bindgen::prelude::*;
 
+// #[cfg(feature = "arena-capture-the-flag")]
+// mod ctf;
+
+mod global;
 mod logging;
+mod swamp;
 mod tutorials;
 
 fn setup() {
@@ -34,5 +40,48 @@ pub fn tick() {
     #[cfg(feature = "arena-tutorial-creeps_bodies")]
     {
         tutorials::creeps_bodies::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-store-and-transfer")]
+    {
+        tutorials::store_and_transfer::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-terrain")]
+    {
+        tutorials::terrain::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-spawn-creeps")]
+    {
+        tutorials::spawn_creeps::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-harvest-energy")]
+    {
+        tutorials::harvest_energy::run();
+    }
+
+    #[cfg(feature = "arena-tutorial-construction")]
+    {
+        tutorials::construction::run(tick);
+    }
+
+    #[cfg(feature = "arena-tutorial-final-test")]
+    {
+        tutorials::final_test::run(tick);
+    }
+
+    #[cfg(feature = "arena-capture-the-flag")]
+    {
+        // ctf::run(tick);
+    }
+
+    #[cfg(feature = "arena-spawn-and-swamp")]
+    {
+        if let Err(error) = swamp::run(tick) {
+            let error_message = format!("{:?}", error);
+            warn!("{error_message}");
+        }
     }
 }
