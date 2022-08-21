@@ -1,5 +1,3 @@
-use std::default;
-
 use eyre::{bail, Result};
 use js_sys::Reflect;
 use screeps_arena::Creep;

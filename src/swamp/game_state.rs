@@ -1,6 +1,5 @@
 use eyre::{bail, Result};
-use js_sys::{JsString, Object, Reflect};
-use log::warn;
+use js_sys::Reflect;
 use screeps_arena::StructureSpawn;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;

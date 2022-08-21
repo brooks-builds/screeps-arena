@@ -1,10 +1,6 @@
-use eyre::{bail, Result};
-use log::warn;
-use screeps_arena::{Part, StructureSpawn};
-
-use crate::global::utilities::get_creep_id;
-
 use super::{game_state::GameState, role::Role};
+use eyre::{bail, Result};
+use screeps_arena::{Part, StructureSpawn};
 
 const INITIAL_COLLECTOR_BODY: [Part; 2] = [Part::Move, Part::Carry];
 

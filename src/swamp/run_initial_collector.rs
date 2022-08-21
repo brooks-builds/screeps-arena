@@ -1,6 +1,5 @@
 use eyre::{bail, Result};
-use js_sys::Object;
-use screeps_arena::{game, Creep, ResourceType, StructureContainer, StructureSpawn};
+use screeps_arena::{Creep, ResourceType, StructureContainer, StructureSpawn};
 
 use crate::global::utilities::{create_position_object, get_creep_id};
 

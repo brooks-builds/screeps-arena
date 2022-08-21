@@ -7,11 +7,10 @@ mod role;
 mod run_initial_collector;
 mod spawner;
 
-use eyre::{bail, Result};
-use log::warn;
+use eyre::Result;
 use screeps_arena::{game::utils::get_objects_by_prototype, prototypes, StructureContainer};
 
-use crate::global::utilities::{get_creep_id, get_creeps, get_spawn};
+use crate::global::utilities::{get_creeps, get_spawn};
 
 use self::game_state::GameState;
 
