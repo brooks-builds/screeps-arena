@@ -118,3 +118,8 @@ pub fn get_containers(with_energy: bool) -> Vec<StructureContainer> {
         })
         .collect()
 }
+
+pub fn get_creep_id(creep: &Creep) -> Result<f64> {
+    let id = creep.id();
+    id.as_f64().ok_or(eyre::eyre!("creep id is not a string"))
+}

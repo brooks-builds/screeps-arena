@@ -1,48 +1,45 @@
+// next will be to run the attackers. Each attacker is really made of 2 units, one is a giant creep with nothing but ranged attack. The other is a fast creep with nothing but move. The mover tows the shooter around
+// attack all enemy creeps, then the enemy spawn
+#![allow(dead_code)]
+
 mod game_state;
-mod run_attackers;
-mod run_collector;
-mod run_defender;
-mod run_healer;
+mod role;
+mod run_initial_collector;
 mod spawner;
 
-use eyre::Result;
+use eyre::{bail, Result};
 use log::warn;
-use screeps_arena::{
-    game::{self, utils::get_objects_by_prototype},
-    prototypes,
-};
+use screeps_arena::{game::utils::get_objects_by_prototype, prototypes, StructureContainer};
 
-use crate::global::{
-    role::Role,
-    utilities::{get_creeps, get_spawn},
-};
+use crate::global::utilities::{get_creep_id, get_creeps, get_spawn};
 
-use self::{
-    game_state::GameState, run_attackers::run_attackers, run_collector::run_collector,
-    run_defender::run_defender, run_healer::run_healer, spawner::run_spawner,
-};
+use self::game_state::GameState;
 
-#[allow(dead_code)]
-pub fn run(_tick: u32) -> Result<()> {
+pub fn run(ticks: u32) -> Result<()> {
+    let my_spawn = get_spawn(true).ok_or(eyre::eyre!("Error getting my spawn"))?;
     let my_creeps = get_creeps(true);
-    let enemies = get_creeps(false);
-    let my_spawn = get_spawn(true).unwrap();
-    let enemy_spawn = get_spawn(false).unwrap();
-    let game_state = GameState::init(&my_creeps);
+    let containers = get_objects_by_prototype(prototypes::STRUCTURE_CONTAINER)
+        .into_iter()
+        .filter(|container| container.store().get_used_capacity(None) > 0)
+        .collect::<Vec<StructureContainer>>();
 
-    run_spawner(&my_spawn, &game_state);
+    if ticks == 1 {
+        let empty_gamestate = GameState::new(&my_spawn)?;
+        empty_gamestate.save(&my_spawn)?;
+    }
 
-    my_creeps.iter().for_each(|creep| {
-        let role = Role::from(creep);
+    let mut game_state = GameState::load(&my_spawn)?;
+    spawner::run_spawner(&my_spawn, &mut game_state)?;
 
-        match role {
-            Role::Defender => run_defender(creep, &my_spawn, &enemies),
-            Role::Attacker => run_attackers(creep, &game_state, &enemies, &enemy_spawn, &my_spawn),
-            Role::Healer => run_healer(creep, &my_creeps, &my_spawn),
-            Role::Collector => run_collector(creep, &my_spawn),
-            Role::Unknown => todo!(),
-        }
-    });
+    for my_creep in &my_creeps {
+        run_initial_collector::run_initial_collector(
+            my_creep,
+            &my_spawn,
+            &mut game_state,
+            &my_creeps,
+            &containers[0],
+        )?;
+    }
 
-    Ok(())
+    game_state.save(&my_spawn)
 }
